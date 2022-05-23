@@ -10,6 +10,10 @@ variable "k3s_workers" {
 
 variable "ssh_authorized_keys" {}
 
+variable "transip_account" {}
+
+variable "transip_key_path" {}
+
 variable "ip_whitelist" {
     type = list(string)
 }
