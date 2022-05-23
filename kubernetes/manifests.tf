@@ -1,21 +1,4 @@
 ##
-## Cert Manager
-##
-data "kubectl_file_documents" "cert-manager" {
-    # Version: v1.8.0
-    content = file("${path.module}/manifests/cert-manager.yaml")
-}
-
-resource "kubectl_manifest" "cert-manager" {
-    depends_on = [
-        kubernetes_namespace.cert-manager,
-    ]
-
-    count     = length(data.kubectl_file_documents.cert-manager.documents)
-    yaml_body = element(data.kubectl_file_documents.cert-manager.documents, count.index)
-}
-
-##
 ## Longhorn
 ##
 data "kubectl_file_documents" "longhorn" {
@@ -25,6 +8,7 @@ data "kubectl_file_documents" "longhorn" {
 
 resource "kubectl_manifest" "longhorn" {
     depends_on = [
+        data.kubectl_file_documents.longhorn,
         kubernetes_namespace.longhorn,
     ]
 
@@ -42,6 +26,7 @@ data "kubectl_file_documents" "argocd" {
 
 resource "kubectl_manifest" "argocd" {
     depends_on = [
+        data.kubectl_file_documents.argocd,
         kubernetes_namespace.argocd,
     ]
 

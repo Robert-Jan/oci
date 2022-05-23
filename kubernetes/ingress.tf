@@ -7,17 +7,11 @@ resource "kubernetes_ingress_v1" "argocd" {
         namespace = "argocd"
 
         annotations = {
-            "kubernetes.io/ingress.class"                    = "nginx"
-            "kubernetes.io/tls-acme"                         = "true"
-            "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
-            "nginx.ingress.kubernetes.io/backend-protocol"   = "HTTPS"
-            "nginx.ingress.kubernetes.io/ssl-passthrough"    = "true"
+            "kubernetes.io/ingress.class" = "nginx"
         }
     }
 
     spec {
-        #ingress_class_name = "nginx"
-
         rule {
             host = "argocd.robert-jan.me"
 
@@ -38,20 +32,13 @@ resource "kubernetes_ingress_v1" "argocd" {
                 }
             }
         }
-
-        tls {
-            hosts = [
-                "argocd.robert-jan.me"
-            ]
-            secret_name = "argocd-secret"
-        }
     }
 }
 
 ##
 ## Longhorn UI Ingress 
 ##
-resource "kubernetes_secret_v1" "example" {
+resource "kubernetes_secret_v1" "longhorn_basic_auth" {
     metadata {
         name      = "basic-auth"
         namespace = "longhorn-system"
@@ -59,8 +46,8 @@ resource "kubernetes_secret_v1" "example" {
 
     data = {
         auth     = "rjvdelst:$apr1$V06psHC/$k/6qoxsjIIonXw8xzff850"
-        username = "admin"
-        password = "iD72CgorY2WO6TdRRJv3"
+        username = ""
+        password = ""
     }
 
     type = "kubernetes.io/basic-auth"
@@ -78,12 +65,6 @@ resource "kubernetes_ingress_v1" "longhorn" {
             "nginx.ingress.kubernetes.io/auth-secret"     = "basic-auth"
             "nginx.ingress.kubernetes.io/auth-realm"      = "Authentication Required"
             "nginx.ingress.kubernetes.io/proxy-body-size" = "10000m"
-
-            # TLS
-            "kubernetes.io/tls-acme"                       = "true"
-            "cert-manager.io/cluster-issuer"               = "letsencrypt-prod"
-            "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
-
         }
     }
 
@@ -107,13 +88,6 @@ resource "kubernetes_ingress_v1" "longhorn" {
                     }
                 }
             }
-        }
-
-        tls {
-            hosts = [
-                "longhorn.robert-jan.me"
-            ]
-            secret_name = "longhorn-cert"
         }
     }
 }

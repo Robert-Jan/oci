@@ -52,51 +52,55 @@ resource "oci_load_balancer_backend" "http" {
 }
 
 # HTTPS
-# # resource "oci_load_balancer_certificate" "https" {
-# #     certificate_name = "lb_https_cert"
-# #     load_balancer_id = oci_load_balancer_load_balancer.public.id
-# #
-# #     lifecycle {
-# #         create_before_destroy = true
-# #     }
-# # }
+resource "oci_load_balancer_certificate" "https" {
+    certificate_name = format("letsencrypt-%s", md5(acme_certificate.certificate.certificate_pem))
+    load_balancer_id = oci_load_balancer_load_balancer.public.id
 
-# resource "oci_load_balancer_listener" "https" {
-#     default_backend_set_name = oci_load_balancer_backend_set.https.name
-#     load_balancer_id         = oci_load_balancer_load_balancer.public.id
-#     name                     = "https_listener"
-#     protocol                 = "HTTP"
-#     port                     = 443
+    public_certificate = acme_certificate.certificate.certificate_pem
+    private_key        = acme_certificate.certificate.private_key_pem
+    passphrase         = random_password.cert.result
 
-#     # ssl_configuration {
-#     #     certificate_name        = oci_load_balancer_certificate.https.certificate_name
-#     #     cipher_suite_name       = "oci-default-ssl-cipher-suite-v1"
-#     #     verify_peer_certificate = false
-#     #     verify_depth            = 1
-#     # }
-# }
+    lifecycle {
+        create_before_destroy = true
+    }
+}
 
-# resource "oci_load_balancer_backend_set" "https" {
-#     load_balancer_id = oci_load_balancer_load_balancer.public.id
-#     name             = "https_backend_set"
-#     policy           = "ROUND_ROBIN"
+resource "oci_load_balancer_listener" "https" {
+    default_backend_set_name = oci_load_balancer_backend_set.https.name
+    load_balancer_id         = oci_load_balancer_load_balancer.public.id
+    name                     = "https_listener"
+    protocol                 = "HTTP"
+    port                     = 443
 
-#     health_checker {
-#         protocol    = "HTTP"
-#         port        = 443
-#         url_path    = "/healthz"
-#         return_code = 200
-#     }
-# }
+    ssl_configuration {
+        certificate_name        = oci_load_balancer_certificate.https.certificate_name
+        cipher_suite_name       = "oci-default-ssl-cipher-suite-v1"
+        verify_peer_certificate = false
+        verify_depth            = 1
+    }
+}
 
-# resource "oci_load_balancer_backend" "https" {
-#     depends_on = [
-#         oci_core_instance.k3s_worker,
-#     ]
+resource "oci_load_balancer_backend_set" "https" {
+    load_balancer_id = oci_load_balancer_load_balancer.public.id
+    name             = "https_backend_set"
+    policy           = "ROUND_ROBIN"
 
-#     count            = var.k3s_workers
-#     backendset_name  = oci_load_balancer_backend_set.https.name
-#     ip_address       = oci_core_instance.k3s_worker[count.index].private_ip
-#     load_balancer_id = oci_load_balancer_load_balancer.public.id
-#     port             = 443
-# }
+    health_checker {
+        protocol    = "HTTP"
+        port        = 443
+        url_path    = "/healthz"
+        return_code = 200
+    }
+}
+
+resource "oci_load_balancer_backend" "https" {
+    depends_on = [
+        oci_core_instance.k3s_worker,
+    ]
+
+    count            = var.k3s_workers
+    backendset_name  = oci_load_balancer_backend_set.https.name
+    ip_address       = oci_core_instance.k3s_worker[count.index].private_ip
+    load_balancer_id = oci_load_balancer_load_balancer.public.id
+    port             = 443
+}

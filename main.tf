@@ -11,6 +11,8 @@ variable "region" {
 variable "private_key" {}
 variable "fingerprint" {}
 variable "ssh_authorized_keys" {}
+variable "transip_account" {}
+variable "transip_key_path" {}
 variable "ip_whitelist" {}
 
 module "cloud" {
@@ -20,6 +22,8 @@ module "cloud" {
     user_ocid           = var.user_ocid
     availability_domain = var.availability_domain
     ssh_authorized_keys = var.ssh_authorized_keys
+    transip_account     = var.transip_account
+    transip_key_path    = var.transip_key_path
     ip_whitelist        = var.ip_whitelist
 }
 
