@@ -7,7 +7,8 @@ resource "kubernetes_ingress_v1" "argocd" {
         namespace = "argocd"
 
         annotations = {
-            "kubernetes.io/ingress.class" = "nginx"
+            "kubernetes.io/ingress.class"                    = "nginx"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
         }
     }
 
@@ -59,12 +60,12 @@ resource "kubernetes_ingress_v1" "longhorn" {
         namespace = "longhorn-system"
 
         annotations = {
-            "kubernetes.io/ingress.class"                 = "nginx"
-            "nginx.ingress.kubernetes.io/ssl-redirect"    = "false"
-            "nginx.ingress.kubernetes.io/auth-type"       = "basic"
-            "nginx.ingress.kubernetes.io/auth-secret"     = "basic-auth"
-            "nginx.ingress.kubernetes.io/auth-realm"      = "Authentication Required"
-            "nginx.ingress.kubernetes.io/proxy-body-size" = "10000m"
+            "kubernetes.io/ingress.class"                    = "nginx"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/auth-type"          = "basic"
+            "nginx.ingress.kubernetes.io/auth-secret"        = "basic-auth"
+            "nginx.ingress.kubernetes.io/auth-realm"         = "Authentication Required"
+            "nginx.ingress.kubernetes.io/proxy-body-size"    = "10000m"
         }
     }
 
