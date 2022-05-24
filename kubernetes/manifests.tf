@@ -21,6 +21,11 @@ resource "kubectl_manifest" "longhorn" {
 ##
 data "kubectl_file_documents" "argocd" {
     # Version: v2.4.0-rc1
+    #
+    # OVERIDE:
+    # - command:
+    #    - argocd-server
+    #    - --insecure <-- ADDED
     content = file("${path.module}/manifests/argocd.yaml")
 }
 

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whoami
+  namespace: playground
+  labels:
+    app: containous
+    name: whoami
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: containous
+      task: whoami
+  template:
+    metadata:
+      labels:
+        app: containous
+        task: whoami
+    spec:
+      nodeSelector:
+        node-type: "master"
+      containers:
+        - name: whoami
+          image: containous/whoami
+          ports:
+            - containerPort: 80
